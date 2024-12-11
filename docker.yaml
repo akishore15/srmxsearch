@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  srmxsearch:
+    image: mcr.microsoft.com/dotnet/aspnet:5.0
+    container_name: srmxsearch
+    ports:
+      - "8080:80"
+    volumes:
+      - ./app:/app
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    command: ["dotnet", "srmxsearch.dll"]
+
+  subnetter:
+    image: mcr.microsoft.com/dotnet/sdk:5.0
+    container_name: subnetter
+    volumes:
+      - ./subnetter:/subnetter
+    command: ["dotnet", "run", "--project", "/subnetter"]
+
+  vpn:
+    image: hwdsl2/ipsec-vpn-server
+    container_name: vpn
+    environment:
+      - VPN_IPSEC_PSK=your_ipsec_pre_shared_key
+      - VPN_USER=your_vpn_username
+      - VPN_PASSWORD=your_vpn_password
+    ports:
+      - "500:500/udp"
+      - "4500:4500/udp"
+    privileged: true
+
+  browser:
+    image: selenium/standalone-chrome
+    container_name: browser
+    ports:
+      - "4444:4444"
+    volumes:
+      - /dev/shm:/dev/shm
